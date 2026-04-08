@@ -1,48 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Focus Todo App</title>
+  <title>Focus Todo Pro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      text-align: center;
       margin: 0;
-      padding: 20px;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
     }
 
     .container {
       max-width: 500px;
       margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #111827;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      margin-bottom: 15px;
     }
 
     input {
+      width: 65%;
       padding: 10px;
-      width: 70%;
-      border-radius: 5px;
+      border-radius: 8px;
       border: none;
+      outline: none;
     }
 
     button {
       padding: 10px;
-      margin: 5px;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       background: #22c55e;
       color: white;
       cursor: pointer;
+      margin-left: 5px;
     }
 
     .task {
-      background: #1e293b;
-      margin: 10px 0;
-      padding: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: #1f2937;
+      padding: 10px;
+      margin-top: 8px;
       border-radius: 8px;
     }
 
@@ -52,12 +65,16 @@
     }
 
     #timer {
-      font-size: 40px;
-      margin: 20px;
+      font-size: 42px;
+      text-align: center;
+      margin: 15px 0;
+      color: #22c55e;
     }
 
     .progress {
+      text-align: center;
       margin-top: 10px;
+      color: #93c5fd;
     }
   </style>
 </head>
@@ -65,23 +82,25 @@
 <body>
 
 <div class="container">
-  <h2>🔥 Focus Todo App</h2>
 
-  <!-- Input -->
-  <input id="taskInput" placeholder="Enter task">
-  <button onclick="addTask()">Add</button>
+  <h1>🔥 Focus Todo Pro</h1>
 
-  <!-- Task List -->
-  <div id="taskList"></div>
+  <div class="card">
+    <input id="taskInput" placeholder="Enter your task">
+    <button onclick="addTask()">Add</button>
 
-  <!-- Timer -->
-  <div id="timer">25:00</div>
+    <div id="taskList"></div>
+    <div class="progress" id="progress"></div>
+  </div>
 
-  <button onclick="startTimer()">Start</button>
-  <button onclick="resetTimer()">Reset</button>
+  <div class="card">
+    <div id="timer">25:00</div>
+    <div style="text-align:center;">
+      <button onclick="startTimer()">Start</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
 
-  <!-- Progress -->
-  <div class="progress" id="progress"></div>
 </div>
 
 <script>
@@ -93,22 +112,22 @@ function saveTasks() {
 
 function addTask() {
   let input = document.getElementById("taskInput");
-  if (input.value.trim() === "") return;
+  if (!input.value) return;
 
-  tasks.push({ text: input.value, completed: false });
+  tasks.push({ text: input.value, done: false });
   input.value = "";
   saveTasks();
   renderTasks();
 }
 
-function toggleComplete(index) {
-  tasks[index].completed = !tasks[index].completed;
+function toggleTask(i) {
+  tasks[i].done = !tasks[i].done;
   saveTasks();
   renderTasks();
 }
 
-function deleteTask(index) {
-  tasks.splice(index, 1);
+function deleteTask(i) {
+  tasks.splice(i, 1);
   saveTasks();
   renderTasks();
 }
@@ -117,17 +136,17 @@ function renderTasks() {
   let list = document.getElementById("taskList");
   list.innerHTML = "";
 
-  tasks.forEach((task, index) => {
+  tasks.forEach((task, i) => {
     let div = document.createElement("div");
     div.className = "task";
 
     div.innerHTML = `
-      <span class="${task.completed ? 'completed' : ''}">
+      <span class="${task.done ? 'completed' : ''}">
         ${task.text}
       </span>
       <div>
-        <button onclick="toggleComplete(${index})">✔</button>
-        <button onclick="deleteTask(${index})">❌</button>
+        <button onclick="toggleTask(${i})">✔</button>
+        <button onclick="deleteTask(${i})">❌</button>
       </div>
     `;
 
@@ -138,45 +157,46 @@ function renderTasks() {
 }
 
 function updateProgress() {
-  let completed = tasks.filter(t => t.completed).length;
+  let done = tasks.filter(t => t.done).length;
   document.getElementById("progress").innerText =
-    `Completed: ${completed} / ${tasks.length}`;
+    `Completed: ${done} / ${tasks.length}`;
 }
 
 // Timer
 let time = 1500;
-let interval;
+let timer;
+let running = false;
 
 function startTimer() {
-  if (interval) return;
+  if (running) return;
 
-  interval = setInterval(() => {
+  running = true;
+  timer = setInterval(() => {
     if (time > 0) {
       time--;
       updateTimer();
     } else {
-      clearInterval(interval);
-      interval = null;
+      clearInterval(timer);
       alert("Time's up!");
+      running = false;
     }
   }, 1000);
 }
 
 function resetTimer() {
-  clearInterval(interval);
-  interval = null;
+  clearInterval(timer);
+  running = false;
   time = 1500;
   updateTimer();
 }
 
 function updateTimer() {
-  let min = Math.floor(time / 60);
-  let sec = time % 60;
+  let m = Math.floor(time / 60);
+  let s = time % 60;
   document.getElementById("timer").innerText =
-    `${min}:${sec < 10 ? "0" : ""}${sec}`;
+    `${m}:${s < 10 ? "0" : ""}${s}`;
 }
 
-// Initial load
 renderTasks();
 </script>
 
