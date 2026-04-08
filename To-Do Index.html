@@ -1,44 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Focus App</title>
+  <title>Focus Todo App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: Arial;
-      text-align: center;
-      background: #111;
+      background: #0f172a;
       color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
     }
 
     .container {
-      max-width: 400px;
+      max-width: 500px;
       margin: auto;
-      padding: 20px;
+    }
+
+    input {
+      padding: 10px;
+      width: 70%;
+      border-radius: 5px;
+      border: none;
     }
 
     button {
       padding: 10px;
       margin: 5px;
       border: none;
-      background: #00c853;
+      border-radius: 5px;
+      background: #22c55e;
       color: white;
       cursor: pointer;
     }
 
-    input {
+    .task {
+      background: #1e293b;
+      margin: 10px 0;
       padding: 10px;
-      width: 70%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 8px;
     }
 
-    .task {
-      background: #222;
-      margin: 5px;
-      padding: 10px;
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.6;
     }
 
     #timer {
       font-size: 40px;
       margin: 20px;
+    }
+
+    .progress {
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -46,10 +65,10 @@
 <body>
 
 <div class="container">
-  <h2>Focus App</h2>
+  <h2>🔥 Focus Todo App</h2>
 
-  <!-- Task Input -->
-  <input id="taskInput" placeholder="Add task">
+  <!-- Input -->
+  <input id="taskInput" placeholder="Enter task">
   <button onclick="addTask()">Add</button>
 
   <!-- Task List -->
@@ -61,21 +80,36 @@
   <button onclick="startTimer()">Start</button>
   <button onclick="resetTimer()">Reset</button>
 
+  <!-- Progress -->
+  <div class="progress" id="progress"></div>
 </div>
 
 <script>
-let tasks = [];
-let maxTasks = 3;
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function saveTasks() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 function addTask() {
   let input = document.getElementById("taskInput");
-  if (tasks.length >= maxTasks) {
-    alert("Only 3 tasks allowed!");
-    return;
-  }
+  if (input.value.trim() === "") return;
 
-  tasks.push(input.value);
+  tasks.push({ text: input.value, completed: false });
   input.value = "";
+  saveTasks();
+  renderTasks();
+}
+
+function toggleComplete(index) {
+  tasks[index].completed = !tasks[index].completed;
+  saveTasks();
+  renderTasks();
+}
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  saveTasks();
   renderTasks();
 }
 
@@ -83,12 +117,30 @@ function renderTasks() {
   let list = document.getElementById("taskList");
   list.innerHTML = "";
 
-  tasks.forEach(task => {
+  tasks.forEach((task, index) => {
     let div = document.createElement("div");
     div.className = "task";
-    div.innerText = task;
+
+    div.innerHTML = `
+      <span class="${task.completed ? 'completed' : ''}">
+        ${task.text}
+      </span>
+      <div>
+        <button onclick="toggleComplete(${index})">✔</button>
+        <button onclick="deleteTask(${index})">❌</button>
+      </div>
+    `;
+
     list.appendChild(div);
   });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  let completed = tasks.filter(t => t.completed).length;
+  document.getElementById("progress").innerText =
+    `Completed: ${completed} / ${tasks.length}`;
 }
 
 // Timer
@@ -96,16 +148,23 @@ let time = 1500;
 let interval;
 
 function startTimer() {
+  if (interval) return;
+
   interval = setInterval(() => {
     if (time > 0) {
       time--;
       updateTimer();
+    } else {
+      clearInterval(interval);
+      interval = null;
+      alert("Time's up!");
     }
   }, 1000);
 }
 
 function resetTimer() {
   clearInterval(interval);
+  interval = null;
   time = 1500;
   updateTimer();
 }
@@ -116,6 +175,9 @@ function updateTimer() {
   document.getElementById("timer").innerText =
     `${min}:${sec < 10 ? "0" : ""}${sec}`;
 }
+
+// Initial load
+renderTasks();
 </script>
 
 </body>
