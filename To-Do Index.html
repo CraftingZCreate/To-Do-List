@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Focus App</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #111;
+      color: white;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    button {
+      padding: 10px;
+      margin: 5px;
+      border: none;
+      background: #00c853;
+      color: white;
+      cursor: pointer;
+    }
+
+    input {
+      padding: 10px;
+      width: 70%;
+    }
+
+    .task {
+      background: #222;
+      margin: 5px;
+      padding: 10px;
+    }
+
+    #timer {
+      font-size: 40px;
+      margin: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Focus App</h2>
+
+  <!-- Task Input -->
+  <input id="taskInput" placeholder="Add task">
+  <button onclick="addTask()">Add</button>
+
+  <!-- Task List -->
+  <div id="taskList"></div>
+
+  <!-- Timer -->
+  <div id="timer">25:00</div>
+
+  <button onclick="startTimer()">Start</button>
+  <button onclick="resetTimer()">Reset</button>
+
+</div>
+
+<script>
+let tasks = [];
+let maxTasks = 3;
+
+function addTask() {
+  let input = document.getElementById("taskInput");
+  if (tasks.length >= maxTasks) {
+    alert("Only 3 tasks allowed!");
+    return;
+  }
+
+  tasks.push(input.value);
+  input.value = "";
+  renderTasks();
+}
+
+function renderTasks() {
+  let list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  tasks.forEach(task => {
+    let div = document.createElement("div");
+    div.className = "task";
+    div.innerText = task;
+    list.appendChild(div);
+  });
+}
+
+// Timer
+let time = 1500;
+let interval;
+
+function startTimer() {
+  interval = setInterval(() => {
+    if (time > 0) {
+      time--;
+      updateTimer();
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  time = 1500;
+  updateTimer();
+}
+
+function updateTimer() {
+  let min = Math.floor(time / 60);
+  let sec = time % 60;
+  document.getElementById("timer").innerText =
+    `${min}:${sec < 10 ? "0" : ""}${sec}`;
+}
+</script>
+
+</body>
+</html>
